@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SchemaVision — AI-Powered Database Schema Visualizer</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<!-- ───────────────────────────── SIDEBAR ───────────────────────────── -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+        <rect x="1" y="1" width="8" height="8" rx="2" fill="white" opacity="0.9"/>
+        <rect x="13" y="1" width="8" height="8" rx="2" fill="white" opacity="0.5"/>
+        <rect x="1" y="13" width="8" height="8" rx="2" fill="white" opacity="0.5"/>
+        <rect x="13" y="13" width="8" height="8" rx="2" fill="white" opacity="0.9"/>
+        <line x1="9" y1="5" x2="13" y2="5" stroke="white" stroke-width="1.5"/>
+        <line x1="5" y1="9" x2="5" y2="13" stroke="white" stroke-width="1.5"/>
+        <line x1="17" y1="9" x2="17" y2="13" stroke="white" stroke-width="1.5"/>
+        <line x1="9" y1="17" x2="13" y2="17" stroke="white" stroke-width="1.5"/>
+      </svg>
+    </div>
+    <span class="logo-text">SchemaVision</span>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Workspace</div>
+    <button class="nav-item active" data-panel="diagram" onclick="switchPanel('diagram')">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="10" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="1" y="10" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="10" y="10" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/><path d="M6 3.5h4M3.5 6v4M12.5 6v4M6 12.5h4" stroke="currentColor" stroke-width="1.3"/></svg>
+      ER Diagram
+    </button>
+    <button class="nav-item" data-panel="tables" onclick="switchPanel('tables')">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="10" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M1 6.5h14M5.5 6.5v6.5" stroke="currentColor" stroke-width="1.3"/></svg>
+      Tables
+    </button>
+    <button class="nav-item" data-panel="relationships" onclick="switchPanel('relationships')">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="3" cy="8" r="2" stroke="currentColor" stroke-width="1.3"/><circle cx="13" cy="4" r="2" stroke="currentColor" stroke-width="1.3"/><circle cx="13" cy="12" r="2" stroke="currentColor" stroke-width="1.3"/><path d="M5 8h3l2-4M8 8l3 4" stroke="currentColor" stroke-width="1.3"/></svg>
+      Relationships
+    </button>
+    <button class="nav-item" data-panel="export" onclick="switchPanel('export')">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1v8M5 6l3 3 3-3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M2 11v2.5A1.5 1.5 0 0 0 3.5 15h9a1.5 1.5 0 0 0 1.5-1.5V11" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      Export
+    </button>
+
+    <div class="nav-section-label" style="margin-top:20px">Templates</div>
+    <button class="nav-item" onclick="loadTemplate('ecommerce')">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M1 2h2l2 7h7l1-5H5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="7" cy="13" r="1" fill="currentColor"/><circle cx="12" cy="13" r="1" fill="currentColor"/></svg>
+      E-Commerce
+    </button>
+    <button class="nav-item" onclick="loadTemplate('blog')">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M5 5.5h6M5 8h6M5 10.5h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      Blog / CMS
+    </button>
+    <button class="nav-item" onclick="loadTemplate('saas')">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1l2 4h4l-3 3 1 4-4-2.5L4 12l1-4L2 5h4z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+      SaaS / Auth
+    </button>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="metrics-grid">
+      <div class="metric-chip">
+        <span class="metric-val" id="metric-tables">0</span>
+        <span class="metric-lbl">Tables</span>
+      </div>
+      <div class="metric-chip">
+        <span class="metric-val" id="metric-cols">0</span>
+        <span class="metric-lbl">Columns</span>
+      </div>
+      <div class="metric-chip">
+        <span class="metric-val" id="metric-rels">0</span>
+        <span class="metric-lbl">Relations</span>
+      </div>
+      <div class="metric-chip">
+        <span class="metric-val" id="metric-score">—</span>
+        <span class="metric-lbl">Score</span>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ─────────────────────────── MAIN AREA ─────────────────────────── -->
+<main class="main-area">
+
+  <!-- ── TOP BAR ── -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <button class="icon-btn" id="sidebarToggle" onclick="toggleSidebar()" title="Toggle Sidebar">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 4h14M2 9h14M2 14h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <div class="breadcrumb">
+        <span class="bc-project">Untitled Schema</span>
+        <span class="bc-sep">·</span>
+        <span class="bc-status" id="saveStatus">Saved</span>
+      </div>
+    </div>
+    <div class="topbar-center">
+      <div class="canvas-controls">
+        <button class="ctrl-btn" onclick="zoomOut()" title="Zoom Out">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.4"/><path d="M4 6h4M9.5 9.5l2.5 2.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        </button>
+        <span class="zoom-label" id="zoomLabel">100%</span>
+        <button class="ctrl-btn" onclick="zoomIn()" title="Zoom In">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.4"/><path d="M6 4v4M4 6h4M9.5 9.5l2.5 2.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        </button>
+        <div class="ctrl-divider"></div>
+        <button class="ctrl-btn" onclick="resetView()" title="Reset View">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7a5 5 0 1 0 1-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M2 2v3h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="ctrl-btn" onclick="autoArrange()" title="Auto Arrange">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="4" height="4" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="9" y="1" width="4" height="4" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="1" y="9" width="4" height="4" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="9" y="9" width="4" height="4" rx="1" stroke="currentColor" stroke-width="1.3"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <button class="btn-ghost" onclick="clearAll()">Clear All</button>
+      <button class="btn-primary" onclick="openAddTable()">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        Add Table
+      </button>
+    </div>
+  </header>
+
+  <!-- ── PANELS ── -->
+  <div class="panels-container">
+
+    <!-- DIAGRAM CANVAS PANEL -->
+    <section class="panel" id="panel-diagram">
+      <div class="canvas-wrapper" id="canvasWrapper">
+        <canvas id="relCanvas"></canvas>
+        <div class="canvas-stage" id="canvasStage">
+          <!-- Tables rendered here by JS -->
+        </div>
+        <div class="canvas-empty" id="canvasEmpty">
+          <div class="empty-icon">
+            <svg width="56" height="56" viewBox="0 0 56 56" fill="none"><rect x="4" y="4" width="20" height="20" rx="4" stroke="white" stroke-width="1.5" opacity="0.3"/><rect x="32" y="4" width="20" height="20" rx="4" stroke="white" stroke-width="1.5" opacity="0.3"/><rect x="4" y="32" width="20" height="20" rx="4" stroke="white" stroke-width="1.5" opacity="0.3"/><rect x="32" y="32" width="20" height="20" rx="4" stroke="white" stroke-width="1.5" opacity="0.3"/><path d="M24 14h8M14 24v8M42 24v8M24 42h8" stroke="white" stroke-width="1.5" opacity="0.5"/></svg>
+          </div>
+          <h3>No tables yet</h3>
+          <p>Click <strong>Add Table</strong> to begin designing your schema,<br>or load a template from the sidebar.</p>
+          <button class="btn-primary" onclick="openAddTable()">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            Create First Table
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- TABLES PANEL -->
+    <section class="panel hidden" id="panel-tables">
+      <div class="panel-inner">
+        <div class="panel-header">
+          <h2>Tables</h2>
+          <button class="btn-primary small" onclick="openAddTable()">New Table</button>
+        </div>
+        <div id="tablesList" class="tables-list"></div>
+      </div>
+    </section>
+
+    <!-- RELATIONSHIPS PANEL -->
+    <section class="panel hidden" id="panel-relationships">
+      <div class="panel-inner">
+        <div class="panel-header">
+          <h2>Relationships</h2>
+          <button class="btn-primary small" onclick="openAddRelationship()">New Relation</button>
+        </div>
+        <div id="relationshipsList" class="relationships-list"></div>
+      </div>
+    </section>
+
+    <!-- EXPORT PANEL -->
+    <section class="panel hidden" id="panel-export">
+      <div class="panel-inner">
+        <div class="panel-header"><h2>Export Schema</h2></div>
+        <div class="export-tabs">
+          <button class="export-tab active" onclick="switchExport('sql', this)">SQL</button>
+          <button class="export-tab" onclick="switchExport('json', this)">JSON</button>
+        </div>
+        <div class="export-toolbar">
+          <select id="sqlDialect" onchange="renderSQL()">
+            <option value="postgresql">PostgreSQL</option>
+            <option value="mysql">MySQL</option>
+            <option value="sqlite">SQLite</option>
+          </select>
+          <button class="btn-ghost small" onclick="copyExport()">Copy</button>
+          <button class="btn-primary small" onclick="downloadExport()">Download</button>
+        </div>
+        <div class="export-code-wrap">
+          <pre id="exportOutput" class="export-code"></pre>
+        </div>
+        <div class="import-section">
+          <div class="import-header">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 11V3M5 8l3 3 3-3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M2 13h12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            Import JSON Schema
+          </div>
+          <textarea id="importInput" placeholder='{"tables":[...],"relationships":[...]}' rows="5"></textarea>
+          <button class="btn-ghost" onclick="importJSON()">Import</button>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<!-- ─────────────────────── MODALS ─────────────────────── -->
+
+<!-- Add / Edit Table Modal -->
+<div class="modal-overlay" id="tableModal" onclick="closeModal(event,'tableModal')">
+  <div class="modal" onclick="e=>e.stopPropagation()">
+    <div class="modal-header">
+      <h3 id="tableModalTitle">New Table</h3>
+      <button class="modal-close" onclick="closeModalById('tableModal')">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="field-group">
+        <label>Table Name</label>
+        <input type="text" id="tableNameInput" placeholder="e.g. users, products…" />
+      </div>
+      <div class="columns-section">
+        <div class="columns-header">
+          <span>Columns</span>
+          <button class="btn-ghost small" onclick="addColumnRow()">+ Add Column</button>
+        </div>
+        <div class="columns-list-header">
+          <span>Name</span><span>Type</span><span>PK</span><span>FK</span><span>NN</span><span></span>
+        </div>
+        <div id="columnsList"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModalById('tableModal')">Cancel</button>
+      <button class="btn-primary" onclick="saveTable()">Save Table</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Relationship Modal -->
+<div class="modal-overlay" id="relModal" onclick="closeModal(event,'relModal')">
+  <div class="modal modal-sm" onclick="e=>e.stopPropagation()">
+    <div class="modal-header">
+      <h3>New Relationship</h3>
+      <button class="modal-close" onclick="closeModalById('relModal')">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="field-group">
+        <label>From Table</label>
+        <select id="relFrom"></select>
+      </div>
+      <div class="field-group">
+        <label>From Column</label>
+        <select id="relFromCol"></select>
+      </div>
+      <div class="field-group">
+        <label>To Table</label>
+        <select id="relTo"></select>
+      </div>
+      <div class="field-group">
+        <label>To Column</label>
+        <select id="relToCol"></select>
+      </div>
+      <div class="field-group">
+        <label>Relationship Type</label>
+        <select id="relType">
+          <option value="one-to-one">One to One (1:1)</option>
+          <option value="one-to-many">One to Many (1:N)</option>
+          <option value="many-to-many">Many to Many (N:M)</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModalById('relModal')">Cancel</button>
+      <button class="btn-primary" onclick="saveRelationship()">Add Relationship</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
